@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="lnmp," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="本文转自这里 简介 LNMP是Linux、Nginx、MySQL(MariaDB)和PHP的缩写,这个组合是最常见的WEB服务器的运行环境之一。 本文将带领大家在CentOS 7操作系统上搭建一套LNMP环境。 本教程适用于CentOS 7.x版本。">
+<meta name="keywords" content="lnmp">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CentOS7☞lnmp环境搭建">
+<meta property="og:url" content="http://blog.bytesclub.com/2017/02/27/CentOS7☞lnmp环境搭建/index.html">
+<meta property="og:site_name" content="ma5694&#39;s blog">
+<meta property="og:description" content="本文转自这里 简介 LNMP是Linux、Nginx、MySQL(MariaDB)和PHP的缩写,这个组合是最常见的WEB服务器的运行环境之一。 本文将带领大家在CentOS 7操作系统上搭建一套LNMP环境。 本教程适用于CentOS 7.x版本。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-06-11T02:11:48.895Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CentOS7☞lnmp环境搭建">
+<meta name="twitter:description" content="本文转自这里 简介 LNMP是Linux、Nginx、MySQL(MariaDB)和PHP的缩写,这个组合是最常见的WEB服务器的运行环境之一。 本文将带领大家在CentOS 7操作系统上搭建一套LNMP环境。 本教程适用于CentOS 7.x版本。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"hide","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'MFIYX4QR78',
+      apiKey: '80d9da230f85d4e716ac852cc3361063',
+      indexName: 'ma5694',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://blog.bytesclub.com/2017/02/27/CentOS7☞lnmp环境搭建/"/>
+
+
+
+
+
+  <title>CentOS7☞lnmp环境搭建 | ma5694's blog</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?d48bb2c50191318d41d7adf1ed73859c";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ma5694's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br />
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://blog.bytesclub.com/2017/02/27/CentOS7☞lnmp环境搭建/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="马雄飞">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ma5694's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">CentOS7☞lnmp环境搭建</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-02-27T18:00:51+08:00">
+                2017-02-27
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/02/27/CentOS7☞lnmp环境搭建/" class="leancloud_visitors" data-flag-title="CentOS7☞lnmp环境搭建">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本文转自<a href="https://mos.meituan.com/library/18/how-to-install-lnmp-on-centos7/" target="_blank" rel="external">这里</a></p>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><hr>
+<p>LNMP是Linux、Nginx、MySQL(MariaDB)和PHP的缩写,这个组合是最常见的WEB服务器的运行环境之一。</p>
+<p>本文将带领大家在CentOS 7操作系统上搭建一套LNMP环境。</p>
+<p>本教程适用于CentOS 7.x版本。<br><a id="more"></a></p>
+<h2 id="安装Nginx"><a href="#安装Nginx" class="headerlink" title="安装Nginx"></a>安装Nginx</h2><hr>
+<p><code>yum install nginx</code></p>
+<blockquote>
+<p>如果报没有可用的软件包nginx错误,解决方法这<a href="https://blog.bytesclub.com/2017/02/27/%E6%B2%A1%E6%9C%89%E5%8F%AF%E7%94%A8%E8%BD%AF%E4%BB%B6%E5%8C%85nginx/">这里</a></p>
+</blockquote>
+<p>按照提示,输入yes后开始安装。安装完毕后,Nginx的配置文件在/etc/nginx目录下。使用以下命令启动Nginx:<br><code>systemctl start nginx</code></p>
+<p>检查系统中firewalld防火墙服务是否开启,如果已开启,我们需要修改防火墙配置,开启Nginx外网端口访问。<br><code>systemctl status firewalld</code></p>
+<p>如果显示active (running),则需要调整防火墙规则的配置。</p>
+<p>修改/etc/firewalld/zones/public.xml文件,在zone一节中增加:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;zone&gt;</div><div class="line">    ...</div><div class="line">    &lt;service name=&quot;nginx&quot;/&gt;</div><div class="line">&lt;zone&gt;</div></pre></td></tr></table></figure></p>
+<p>保存后重新加载firewalld服务:<code>systemctl reload firewalld</code></p>
+<p>可以通过浏览器访问 http://&lt;外网IP地址&gt; 来确定Nginx是否已经启动。</p>
+<p>最后将Nginx设置为开机启动:<code>systemctl enable nginx.service</code></p>
+<blockquote>
+<p>测试环境的话,为了方便也可以先禁用掉防火墙</p>
+</blockquote>
+<h2 id="安装MySQL-MariaDB"><a href="#安装MySQL-MariaDB" class="headerlink" title="安装MySQL(MariaDB)"></a>安装MySQL(MariaDB)</h2><hr>
+<p>MariaDB是MySQL的一个分支,主要由开源社区进行维护和升级,而MySQL被Oracle收购以后,发展较慢。在CentOS 7的软件仓库中,将MySQL更替为了MariaDB。</p>
+<p>我们可以使用yum直接安装MariaDB:<br><code>yum install mariadb-server</code></p>
+<p>安装完成之后,执行以下命令重启MariaDB服务: <code>systemctl start mariadb</code></p>
+<p>MariaDB默认root密码为空,我们需要设置一下,执行脚本:<code>/usr/bin/mysql_secure_installation</code></p>
+<p>首先提示输入当前的root密码:<br><code>Enter current password for root (enter for none):</code></p>
+<p>初始root密码为空,我们直接敲回车进行下一步<br><code>Set root password? [Y/n]</code></p>
+<p>设置root密码,默认选项为Yes,我们直接回车,提示输入密码,在这里设置您的MariaDB的root账户密码<br><code>Remove anonymous users? [Y/n]</code></p>
+<p>是否移除匿名用户,默认选项为Yes,建议按默认设置,回车继续<br><code>Disallow root login remotely? [Y/n]</code></p>
+<p>是否禁止root用户远程登录？如果您只在本机内访问MariaDB,建议按默认设置,回车继续<br><code>Remove test database and access to it? [Y/n]</code></p>
+<p>是否删除测试用的数据库和权限？ 建议按照默认设置,回车继续<br><code>Reload privilege tables now? [Y/n]</code></p>
+<p>是否重新加载权限表？因为我们上面更新了root的密码,这里需要重新加载,回车。</p>
+<p>完成后你会看到Success!的提示,MariaDB的安全设置已经完成。我们可以使用以下命令登录MariaDB:<code>mysql -uroot -p</code></p>
+<p>按提示输入root密码,就会进入MariaDB的交互界面,说明已经安装成功。</p>
+<p>最后我们将MariaDB设置为开机启动<code>systemctl enable mariadb</code></p>
+<h2 id="安装PHP"><a href="#安装PHP" class="headerlink" title="安装PHP"></a>安装PHP</h2><hr>
+<p>我们可以直接使用yum安装PHP:<code>yum install php-fpm php-mysql</code></p>
+<p>安装完成后我们将php-fpm启动:<code>systemctl start php-fpm</code></p>
+<p>将php-fpm设置为开机启动: <code>systemctl enable php-fpm</code></p>
+<p>php安装完成之后,需要设置一下php session的目录:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">sudo mkdir /var/lib/php/session/</div><div class="line">sudo chown -R apache:apache /var/lib/php/session/</div></pre></td></tr></table></figure></p>
+<p>这时php-fpm已经安装完毕,但是现在需要配置一下Nginx,在/etc/nginx/conf.d目录中新建一个名为php.conf的文件,其内容为:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">server &#123;</div><div class="line">    listen 80;</div><div class="line">    # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000</div><div class="line">    #</div><div class="line">    location ~ \.php$ &#123;</div><div class="line">        root           /usr/share/php;</div><div class="line">        fastcgi_pass   127.0.0.1:9000;</div><div class="line">        fastcgi_index  index.php;</div><div class="line">        fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;</div><div class="line">        include        fastcgi_params;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>然后执行以下命令使我们的配置生效:<code>systemctl reload nginx</code></p>
+<p>以上我们配置了Nginx的8000端口用来测试,如果您在美团云控制台创建机器时选择了绑定防火墙,需要检查该防火墙是否允许80端口,如果不允许的话,可以在防火墙设置中新增防火墙,并关联到该主机。</p>
+<p>我们在/usr/share/php目录下新建一个名为phpinfo.php的文件用来展示phpinfo信息,文件内容为:</p>
+<p><code>&lt;?php echo phpinfo(); ?&gt;</code></p>
+<p>我们从浏览器打开 http://&lt;外网IP地址&gt;:80/phpinfo.php,您就能看到phpinfo信息了,说明我们php环境已经部署成功;</p>
+<h2 id="升级PHP版本"><a href="#升级PHP版本" class="headerlink" title="升级PHP版本"></a>升级PHP版本</h2><hr>
+<p>yum 默认安装的版本是5.4,现在升级PHP版本至5.6</p>
+<p>执行下面命令:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">rpm -Uvh https://mirror.webtatic.com/yum/el7/epel-release.rpm</div><div class="line"></div><div class="line">rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm</div></pre></td></tr></table></figure></p>
+<p>执行下面的命令删除php<br><code>yum remove php-common</code><br>然后像安装那样问你是否继续的,输入yes即可</p>
+<p>安装php5.6</p>
+<p><code>yum install -y php56w php56w-opcache php56w-xml php56w-fpm php56w-mcrypt php56w-gd php56w-devel php56w-mysql php56w-intl php56w-mbstring</code></p>
+<p>查看php版本<code>php-fpm --version</code></p>
+<p>重启服务<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">systemctl restart nginx</div><div class="line">systemctl restart mariadb</div><div class="line">systemctl restart php-fpm</div></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/lnmp/" rel="tag"># lnmp</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/02/27/没有可用软件包nginx/" rel="next" title="没有可用软件包nginx">
+                <i class="fa fa-chevron-left"></i> 没有可用软件包nginx
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/04/08/Centos7中，PHP7下，扩展的安装/" rel="prev" title="Centos7中,PHP7下,扩展的安装">
+                Centos7中,PHP7下,扩展的安装 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="马雄飞" />
+          <p class="site-author-name" itemprop="name">马雄飞</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装Nginx"><span class="nav-number">2.</span> <span class="nav-text">安装Nginx</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装MySQL-MariaDB"><span class="nav-number">3.</span> <span class="nav-text">安装MySQL(MariaDB)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装PHP"><span class="nav-number">4.</span> <span class="nav-text">安装PHP</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#升级PHP版本"><span class="nav-number">5.</span> <span class="nav-text">升级PHP版本</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">马雄飞</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.1"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("NSw4ELzlEODzwPlopsqjtDvU-gzGzoHsz", "HLLJvT2T5BsCiMimW2HbqDTU");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

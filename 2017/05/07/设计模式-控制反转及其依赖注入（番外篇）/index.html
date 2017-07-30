@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="设计模式," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="上面有2篇文章介绍了PHP依赖注入和控制反转的概念和实例,为了加深理解才有这篇文章。 首先,我们假设,我们要开发一个组件命名为SomeComponent.这个组件中现在要注入一个数据库连接。在这个例子中,数据库连接在component中被创建,这种方法不可取,这样做的话,我们将不能改变数据库连接参数及数据库类型等一些参数。">
+<meta name="keywords" content="设计模式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="设计模式-控制反转及其依赖注入(番外篇)">
+<meta property="og:url" content="http://blog.bytesclub.com/2017/05/07/设计模式-控制反转及其依赖注入（番外篇）/index.html">
+<meta property="og:site_name" content="ma5694&#39;s blog">
+<meta property="og:description" content="上面有2篇文章介绍了PHP依赖注入和控制反转的概念和实例,为了加深理解才有这篇文章。 首先,我们假设,我们要开发一个组件命名为SomeComponent.这个组件中现在要注入一个数据库连接。在这个例子中,数据库连接在component中被创建,这种方法不可取,这样做的话,我们将不能改变数据库连接参数及数据库类型等一些参数。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-06-11T02:11:48.078Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="设计模式-控制反转及其依赖注入(番外篇)">
+<meta name="twitter:description" content="上面有2篇文章介绍了PHP依赖注入和控制反转的概念和实例,为了加深理解才有这篇文章。 首先,我们假设,我们要开发一个组件命名为SomeComponent.这个组件中现在要注入一个数据库连接。在这个例子中,数据库连接在component中被创建,这种方法不可取,这样做的话,我们将不能改变数据库连接参数及数据库类型等一些参数。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"hide","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: 'MFIYX4QR78',
+      apiKey: '80d9da230f85d4e716ac852cc3361063',
+      indexName: 'ma5694',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://blog.bytesclub.com/2017/05/07/设计模式-控制反转及其依赖注入（番外篇）/"/>
+
+
+
+
+
+  <title>设计模式-控制反转及其依赖注入(番外篇) | ma5694's blog</title>
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?d48bb2c50191318d41d7adf1ed73859c";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">ma5694's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br />
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  
+  <div class="algolia-popup popup search-popup">
+    <div class="algolia-search">
+      <div class="algolia-search-input-icon">
+        <i class="fa fa-search"></i>
+      </div>
+      <div class="algolia-search-input" id="algolia-search-input"></div>
+    </div>
+
+    <div class="algolia-results">
+      <div id="algolia-stats"></div>
+      <div id="algolia-hits"></div>
+      <div id="algolia-pagination" class="algolia-pagination"></div>
+    </div>
+
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+  </div>
+
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://blog.bytesclub.com/2017/05/07/设计模式-控制反转及其依赖注入（番外篇）/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="马雄飞">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="ma5694's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">设计模式-控制反转及其依赖注入(番外篇)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-07T17:36:10+08:00">
+                2017-05-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/PHP/" itemprop="url" rel="index">
+                    <span itemprop="name">PHP</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+             <span id="/2017/05/07/设计模式-控制反转及其依赖注入（番外篇）/" class="leancloud_visitors" data-flag-title="设计模式-控制反转及其依赖注入(番外篇)">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>上面有2篇文章介绍了PHP依赖注入和控制反转的概念和实例,为了加深理解才有这篇文章。</p>
+<p>首先,我们假设,我们要开发一个组件命名为SomeComponent.这个组件中现在要注入一个数据库连接。<br>在这个例子中,数据库连接在component中被创建,这种方法不可取,这样做的话,我们将不能改变数据库连接参数及数据库类型等一些参数。</p>
+<a id="more"></a>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">&lt;?php</div><div class="line"> </div><div class="line">class SomeComponent</div><div class="line">&#123;</div><div class="line"> </div><div class="line">    /**</div><div class="line">     * The instantiation of the connection is hardcoded inside</div><div class="line">     * the component so is difficult to replace it externally</div><div class="line">     * or change its behavior</div><div class="line">     */</div><div class="line">    public function someDbTask()</div><div class="line">    &#123;</div><div class="line">        $connection = new Connection(array(</div><div class="line">            &quot;host&quot; =&gt; &quot;localhost&quot;,</div><div class="line">            &quot;username&quot; =&gt; &quot;root&quot;,</div><div class="line">            &quot;password&quot; =&gt; &quot;secret&quot;,</div><div class="line">            &quot;dbname&quot; =&gt; &quot;invo&quot;</div><div class="line">        ));</div><div class="line"> </div><div class="line">        // ...</div><div class="line">    &#125;</div><div class="line"> </div><div class="line">&#125;</div><div class="line"> </div><div class="line">$some = new SomeComponent();</div><div class="line">$some-&gt;someDbTask();</div></pre></td></tr></table></figure>
+<p>为了解决上面所说的问题,我们需要在使用前创建一个外部连接,并注入到容器中。就目前而言,这看起来是一个很好的解决方案:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div></pre></td><td class="code"><pre><div class="line">&lt;?php</div><div class="line"> </div><div class="line">class SomeComponent</div><div class="line">&#123;</div><div class="line"> </div><div class="line">    protected $_connection;</div><div class="line"> </div><div class="line">    /**</div><div class="line">     * Sets the connection externally</div><div class="line">     */</div><div class="line">    public function setConnection($connection)</div><div class="line">    &#123;</div><div class="line">        $this-&gt;_connection = $connection;</div><div class="line">    &#125;</div><div class="line"> </div><div class="line">    public function someDbTask()</div><div class="line">    &#123;</div><div class="line">        $connection = $this-&gt;_connection;</div><div class="line"> </div><div class="line">        // ...</div><div class="line">    &#125;</div><div class="line"> </div><div class="line">&#125;</div><div class="line"> </div><div class="line">$some = new SomeComponent();</div><div class="line"> </div><div class="line">//Create the connection</div><div class="line">$connection = new Connection(array(</div><div class="line">    &quot;host&quot; =&gt; &quot;localhost&quot;,</div><div class="line">    &quot;username&quot; =&gt; &quot;root&quot;,</div><div class="line">    &quot;password&quot; =&gt; &quot;secret&quot;,</div><div class="line">    &quot;dbname&quot; =&gt; &quot;invo&quot;</div><div class="line">));</div><div class="line"> </div><div class="line">//Inject the connection in the component</div><div class="line">$some-&gt;setConnection($connection);</div><div class="line"> </div><div class="line">$some-&gt;someDbTask();</div></pre></td></tr></table></figure>
+<p>现在我们来考虑一个问题,我们在应用程序中的不同地方使用此组件,将多次创建数据库连接。使用一种类似全局注册表的方式,从这获得一个数据库连接实例,而不是使用一次就创建一次。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line">&lt;?php</div><div class="line"> </div><div class="line">class Registry</div><div class="line">&#123;</div><div class="line"> </div><div class="line">    /**</div><div class="line">     * Returns the connection</div><div class="line">     */</div><div class="line">    public static function getConnection()</div><div class="line">    &#123;</div><div class="line">       return new Connection(array(</div><div class="line">            &quot;host&quot; =&gt; &quot;localhost&quot;,</div><div class="line">            &quot;username&quot; =&gt; &quot;root&quot;,</div><div class="line">            &quot;password&quot; =&gt; &quot;secret&quot;,</div><div class="line">            &quot;dbname&quot; =&gt; &quot;invo&quot;</div><div class="line">        ));</div><div class="line">    &#125;</div><div class="line"> </div><div class="line">&#125;</div><div class="line"> </div><div class="line">class SomeComponent</div><div class="line">&#123;</div><div class="line"> </div><div class="line">    protected $_connection;</div><div class="line"> </div><div class="line">    /**</div><div class="line">     * Sets the connection externally</div><div class="line">     */</div><div class="line">    public function setConnection($connection)&#123;</div><div class="line">        $this-&gt;_connection = $connection;</div><div class="line">    &#125;</div><div class="line"> </div><div class="line">    public function someDbTask()</div><div class="line">    &#123;</div><div class="line">        $connection = $this-&gt;_connection;</div><div class="line"> </div><div class="line">        // ...</div><div class="line">    &#125;</div><div class="line"> </div><div class="line">&#125;</div><div class="line"> </div><div class="line">$some = new SomeComponent();</div><div class="line"> </div><div class="line">//Pass the connection defined in the registry</div><div class="line">$some-&gt;setConnection(Registry::getConnection());</div><div class="line"> </div><div class="line">$some-&gt;someDbTask();</div></pre></td></tr></table></figure>
+<p>现在,让我们来想像一下,我们必须在组件中实现两个方法,首先需要创建一个新的数据库连接,第二个总是获得一个共享连接:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div></pre></td><td class="code"><pre><div class="line">&lt;?php</div><div class="line"> </div><div class="line">class Registry</div><div class="line">&#123;</div><div class="line"> </div><div class="line">    protected static $_connection;</div><div class="line"> </div><div class="line">    /**</div><div class="line">     * Creates a connection</div><div class="line">     */</div><div class="line">    protected static function _createConnection()</div><div class="line">    &#123;</div><div class="line">        return new Connection(array(</div><div class="line">            &quot;host&quot; =&gt; &quot;localhost&quot;,</div><div class="line">            &quot;username&quot; =&gt; &quot;root&quot;,</div><div class="line">            &quot;password&quot; =&gt; &quot;secret&quot;,</div><div class="line">            &quot;dbname&quot; =&gt; &quot;invo&quot;</div><div class="line">        ));</div><div class="line">    &#125;</div><div class="line"> </div><div class="line">    /**</div><div class="line">     * 单例模式</div><div class="line">     * Creates a connection only once and returns it</div><div class="line">     */</div><div class="line">    public static function getSharedConnection()</div><div class="line">    &#123;</div><div class="line">        if (self::$_connection===null)&#123;</div><div class="line">            $connection = self::_createConnection();</div><div class="line">            self::$_connection = $connection;</div><div class="line">        &#125;</div><div class="line">        return self::$_connection;</div><div class="line">    &#125;</div><div class="line"> </div><div class="line">    /**</div><div class="line">     * Always returns a new connection</div><div class="line">     */</div><div class="line">    public static function getNewConnection()</div><div class="line">    &#123;</div><div class="line">        return self::_createConnection();</div><div class="line">    &#125;</div><div class="line"> </div><div class="line">&#125;</div><div class="line"> </div><div class="line">class SomeComponent</div><div class="line">&#123;</div><div class="line"> </div><div class="line">    protected $_connection;</div><div class="line"> </div><div class="line">    /**</div><div class="line">     * Sets the connection externally</div><div class="line">     */</div><div class="line">    public function setConnection($connection)&#123;</div><div class="line">        $this-&gt;_connection = $connection;</div><div class="line">    &#125;</div><div class="line"> </div><div class="line">    /**</div><div class="line">     * This method always needs the shared connection</div><div class="line">     */</div><div class="line">    public function someDbTask()</div><div class="line">    &#123;</div><div class="line">        $connection = $this-&gt;_connection;</div><div class="line"> </div><div class="line">        // ...</div><div class="line">    &#125;</div><div class="line"> </div><div class="line">    /**</div><div class="line">     * This method always needs a new connection</div><div class="line">     */</div><div class="line">    public function someOtherDbTask($connection)</div><div class="line">    &#123;</div><div class="line"> </div><div class="line">    &#125;</div><div class="line"> </div><div class="line">&#125;</div><div class="line"> </div><div class="line">$some = new SomeComponent();</div><div class="line"> </div><div class="line">//This injects the shared connection</div><div class="line">$some-&gt;setConnection(Registry::getSharedConnection());</div><div class="line"> </div><div class="line">$some-&gt;someDbTask();</div><div class="line"> </div><div class="line">//Here, we always pass a new connection as parameter</div><div class="line">$some-&gt;someOtherDbTask(Registry::getConnection());</div></pre></td></tr></table></figure></p>
+<p>到此为止,我们已经看到了如何使用依赖注入解决我们的问题。不是在代码内部创建依赖关系,而是让其作为一个参数传递,这使得我们的程序更容易维护,降低程序代码的耦合度,实现一种松耦合。但是从长远来看,这种形式的依赖注入也有一些缺点。</p>
+<p>例如,如果组件中有较多的依赖关系,我们需要创建多个setter方法传递,或创建构造函数进行传递。另外,每次使用组件时,都需要创建依赖组件,使代码维护不太易,我们编写的代码可能像这样:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">&lt;?php</div><div class="line"> </div><div class="line">//Create the dependencies or retrieve them from the registry</div><div class="line">$connection = new Connection();</div><div class="line">$session = new Session();</div><div class="line">$fileSystem = new FileSystem();</div><div class="line">$filter = new Filter();</div><div class="line">$selector = new Selector();</div><div class="line"> </div><div class="line">//Pass them as constructor parameters</div><div class="line">$some = new SomeComponent($connection, $session, $fileSystem, $filter, $selector);</div><div class="line"> </div><div class="line">// ... or using setters</div><div class="line"> </div><div class="line">$some-&gt;setConnection($connection);</div><div class="line">$some-&gt;setSession($session);</div><div class="line">$some-&gt;setFileSystem($fileSystem);</div><div class="line">$some-&gt;setFilter($filter);</div><div class="line">$some-&gt;setSelector($selector);</div></pre></td></tr></table></figure>
+<p> 我想,我们不得不在应用程序的许多地方创建这个对象。如果你不需要依赖的组件后,我们又要去代码注入部分移除构造函数中的参数或者是setter方法。为了解决这个问题,我们再次返回去使用一个全局注册表来创建组件。但是,在创建对象之前,它增加了一个新的抽象层:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">&lt;?php</div><div class="line"> </div><div class="line">class SomeComponent</div><div class="line">&#123;</div><div class="line"> </div><div class="line">    // ...</div><div class="line"> </div><div class="line">    /**</div><div class="line">     * Define a factory method to create SomeComponent instances injecting its dependencies</div><div class="line">     */</div><div class="line">    public static function factory()</div><div class="line">    &#123;</div><div class="line"> </div><div class="line">        $connection = new Connection();</div><div class="line">        $session = new Session();</div><div class="line">        $fileSystem = new FileSystem();</div><div class="line">        $filter = new Filter();</div><div class="line">        $selector = new Selector();</div><div class="line"> </div><div class="line">        return new self($connection, $session, $fileSystem, $filter, $selector);</div><div class="line">    &#125;</div><div class="line"> </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p> 这一刻,我们好像回到了问题的开始,我们正在创建组件内部的依赖,我们每次都在修改以及找寻一种解决问题的办法,但这都不是很好的做法。</p>
+<p>一种实用和优雅的来解决这些问题,是使用<strong>容器的依赖注入</strong>,像我们在前面看到的,容器作为全局注册表,使用容器的依赖注入做为一种桥梁来解决依赖可以使我们的代码耦合度更低,很好的降低了组件的复杂性:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div></pre></td><td class="code"><pre><div class="line">&lt;?php</div><div class="line"> </div><div class="line">class SomeComponent</div><div class="line">&#123;</div><div class="line"> </div><div class="line">    protected $_di;</div><div class="line"> </div><div class="line">    public function __construct($di)</div><div class="line">    &#123;</div><div class="line">        $this-&gt;_di = $di;</div><div class="line">    &#125;</div><div class="line"> </div><div class="line">    public function someDbTask()</div><div class="line">    &#123;</div><div class="line"> </div><div class="line">        // Get the connection service</div><div class="line">        // Always returns a new connection</div><div class="line">        $connection = $this-&gt;_di-&gt;get(&apos;db&apos;);</div><div class="line"> </div><div class="line">    &#125;</div><div class="line"> </div><div class="line">    public function someOtherDbTask()</div><div class="line">    &#123;</div><div class="line"> </div><div class="line">        // Get a shared connection service,</div><div class="line">        // this will return the same connection everytime</div><div class="line">        $connection = $this-&gt;_di-&gt;getShared(&apos;db&apos;);</div><div class="line"> </div><div class="line">        //This method also requires a input filtering service</div><div class="line">        $filter = $this-&gt;_db-&gt;get(&apos;filter&apos;);</div><div class="line"> </div><div class="line">    &#125;</div><div class="line"> </div><div class="line">&#125;</div><div class="line"> </div><div class="line">$di = new Phalcon\DI();</div><div class="line"> </div><div class="line">//Register a &quot;db&quot; service in the container</div><div class="line">$di-&gt;set(&apos;db&apos;, function()&#123;</div><div class="line">    return new Connection(array(</div><div class="line">        &quot;host&quot; =&gt; &quot;localhost&quot;,</div><div class="line">        &quot;username&quot; =&gt; &quot;root&quot;,</div><div class="line">        &quot;password&quot; =&gt; &quot;secret&quot;,</div><div class="line">        &quot;dbname&quot; =&gt; &quot;invo&quot;</div><div class="line">    ));</div><div class="line">&#125;);</div><div class="line"> </div><div class="line">//Register a &quot;filter&quot; service in the container</div><div class="line">$di-&gt;set(&apos;filter&apos;, function()&#123;</div><div class="line">    return new Filter();</div><div class="line">&#125;);</div><div class="line"> </div><div class="line">//Register a &quot;session&quot; service in the container</div><div class="line">$di-&gt;set(&apos;session&apos;, function()&#123;</div><div class="line">    return new Session();</div><div class="line">&#125;);</div><div class="line"> </div><div class="line">//Pass the service container as unique parameter</div><div class="line">$some = new SomeComponent($di);</div><div class="line"> </div><div class="line">$some-&gt;someTask();</div></pre></td></tr></table></figure>
+<p>现在,该组件只有访问某种service的时候才需要它,如果它不需要,它甚至不初始化,以节约资源。该组件是高度解耦。他们的行为,或者说他们的任何其他方面都不会影响到组件本身。我们的实现办法 Phalcon\DI 是一个实现了服务的依赖注入功能的组件,它本身也是一个容器。由于Phalcon高度解耦,Phalcon\DI 是框架用来集成其他组件的必不可少的部分,开发人员也可以使用这个组件依赖注入和管理应用程序中不同类文件的实例。</p>
+<p>基本上,这个组件实现了 Inversion of Control 模式。基于此,对象不再以构造函数接收参数或者使用setter的方式来实现注入,而是直接请求服务的依赖注入。这就大大降低了整体程序的复杂性,因为只有一个方法用以获得所需要的一个组件的依赖关系。</p>
+<p>此外,这种模式增强了代码的可测试性,从而使它不容易出错。在容器中注册服务框架本身或开发人员都可以注册服务。当一个组件A要求调用组件B(或它的类的一个实例),可以从容器中请求调用组件B,而不是创建组件B的一个实例。</p>
+<p>这种工作方式为我们提供了许多优点:</p>
+<ul>
+<li><p>我们可以更换一个组件,从他们本身或者第三方轻松创建。</p>
+</li>
+<li><p>在组件发布之前,我们可以充分的控制对象的初始化,并对对象进行各种设置。</p>
+</li>
+<li><p>我们可以使用统一的方式从组件得到一个结构化的全局实例</p>
+</li>
+</ul>
+<p>服务可以通过以下几种方式注入到容器:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">&lt;?php</div><div class="line"> </div><div class="line">//Create the Dependency Injector Container</div><div class="line">$di = new Phalcon\DI();</div><div class="line"> </div><div class="line">//By its class name</div><div class="line">$di-&gt;set(&quot;request&quot;, &apos;Phalcon\Http\Request&apos;);</div><div class="line"> </div><div class="line">//Using an anonymous function, the instance will lazy loaded</div><div class="line">$di-&gt;set(&quot;request&quot;, function()&#123;</div><div class="line">    return new Phalcon\Http\Request();</div><div class="line">&#125;);</div><div class="line"> </div><div class="line">//Registering directly an instance</div><div class="line">$di-&gt;set(&quot;request&quot;, new Phalcon\Http\Request());</div><div class="line"> </div><div class="line">//Using an array definition</div><div class="line">$di-&gt;set(&quot;request&quot;, array(</div><div class="line">    &quot;className&quot; =&gt; &apos;Phalcon\Http\Request&apos;</div><div class="line">));</div></pre></td></tr></table></figure>
+<p>在上面的例子中,当向框架请求访问一个请求数据时,它将首先确定容器中是否存在这个”reqeust”名称的服务。容器会反回一个请求数据的实例,开发人员最终得到他们想要的组件。</p>
+<p>在上面示例中的每一种方法都有优缺点,具体使用哪一种,由开发过程中的特定场景来决定的。用一个字符串来设定一个服务非常简单,但<strong>缺少灵活性</strong>。设置服务时,使用数组则提供了更多的灵活性,而且可以使<strong>用较复杂的代码</strong>。lambda函数是两者之间一个很好的平衡,但也可能导致更多的维护管理成本。</p>
+<p>Phalcon\DI 提供服务的延迟加载。除非开发人员在注入服务的时候直接实例化一个对象,然后存存储到容器中。在容器中,通过数组,字符串等方式存储的服务都将被延迟加载,即只有在请求对象的时候才被初始化</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">&lt;?php</div><div class="line"> </div><div class="line">//Register a service &quot;db&quot; with a class name and its parameters</div><div class="line">$di-&gt;set(&quot;db&quot;, array(</div><div class="line">    &quot;className&quot; =&gt; &quot;Phalcon\Db\Adapter\Pdo\Mysql&quot;,</div><div class="line">    &quot;parameters&quot; =&gt; array(</div><div class="line">          &quot;parameter&quot; =&gt; array(</div><div class="line">               &quot;host&quot; =&gt; &quot;localhost&quot;,</div><div class="line">               &quot;username&quot; =&gt; &quot;root&quot;,</div><div class="line">               &quot;password&quot; =&gt; &quot;secret&quot;,</div><div class="line">               &quot;dbname&quot; =&gt; &quot;blog&quot;</div><div class="line">          )</div><div class="line">    )</div><div class="line">));</div><div class="line"> </div><div class="line">//Using an anonymous function</div><div class="line">$di-&gt;set(&quot;db&quot;, function()&#123;</div><div class="line">    return new Phalcon\Db\Adapter\Pdo\Mysql(array(</div><div class="line">         &quot;host&quot; =&gt; &quot;localhost&quot;,</div><div class="line">         &quot;username&quot; =&gt; &quot;root&quot;,</div><div class="line">         &quot;password&quot; =&gt; &quot;secret&quot;,</div><div class="line">         &quot;dbname&quot; =&gt; &quot;blog&quot;</div><div class="line">    ));</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+<p>以上这两种服务的注册方式产生相同的结果。然后,通过数组定义的,在后面需要的时候,你可以修改服务参数:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">&lt;?php</div><div class="line"> </div><div class="line">$di-&gt;setParameter(&quot;db&quot;, 0, array(</div><div class="line">    &quot;host&quot; =&gt; &quot;localhost&quot;,</div><div class="line">    &quot;username&quot; =&gt; &quot;root&quot;,</div><div class="line">    &quot;password&quot; =&gt; &quot;secret&quot;</div><div class="line">));</div></pre></td></tr></table></figure>
+<p>从容器中获得服务的最简单方式就是使用”get”方法,它将从容器中返回一个新的实例:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&lt;?php    </div><div class="line">     $request = $di-&gt;get(&quot;request&quot;);</div></pre></td></tr></table></figure>
+<p>或者通过下面这种魔术方法的形式调用:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&lt;?php</div><div class="line">    $request = $di-&gt;getRequest();</div><div class="line">    Phalcon\DI //同时允许服务重用,为了得到一个已经实例化过的服务,可以使用 getShared() 方法的形式来获得服务。</div></pre></td></tr></table></figure>
+<p>具体的 Phalcon\Http\Request 请求示例:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&lt;?php</div><div class="line">   $request = $di-&gt;getShared(&quot;request&quot;);</div></pre></td></tr></table></figure>
+<p>参数还可以在请求的时候通过将一个数组参数传递给构造函数的方式:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&lt;?php</div><div class="line">    $component = $di-&gt;get(&quot;MyComponent&quot;, array(&quot;some-parameter&quot;, &quot;other&quot;))</div></pre></td></tr></table></figure>
+<p>复制完毕,本文引自<a href="http://www.zhaoyafei.cn/content.html?id=42" target="_blank" rel="external">这里</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/设计模式/" rel="tag"># 设计模式</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/05/07/设计模式-控制反转及其依赖注入（2）/" rel="next" title="设计模式-控制反转及其依赖注入(2)">
+                <i class="fa fa-chevron-left"></i> 设计模式-控制反转及其依赖注入(2)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/06/09/数据库之主键、外键、索引/" rel="prev" title="数据库之主键、外键、索引">
+                数据库之主键、外键、索引 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.gif"
+               alt="马雄飞" />
+          <p class="site-author-name" itemprop="name">马雄飞</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">8</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2016 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">马雄飞</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+  
+  
+  
+  <link rel="stylesheet" href="/lib/algolia-instant-search/instantsearch.min.css">
+
+  
+  
+  <script src="/lib/algolia-instant-search/instantsearch.min.js"></script>
+  
+
+  <script src="/js/src/algolia-search.js?v=5.1.1"></script>
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.4.js"></script>
+  <script>AV.initialize("NSw4ELzlEODzwPlopsqjtDvU-gzGzoHsz", "HLLJvT2T5BsCiMimW2HbqDTU");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
